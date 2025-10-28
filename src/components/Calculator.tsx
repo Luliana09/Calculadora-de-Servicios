@@ -121,44 +121,50 @@ export const Calculator = ({
   };
 
   return (
-    <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900 p-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 mb-6 animate-fade-in">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-              {serviceType}
-            </h2>
+    <div className="flex-1 overflow-y-auto bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 p-8">
+      <div className="max-w-5xl mx-auto">
+        <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 mb-8 animate-fade-in border border-gray-100 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-8 pb-6 border-b-2 border-gradient-to-r from-blue-500 to-purple-500">
+            <div>
+              <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                {serviceType}
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Configure los detalles de su cotización</p>
+            </div>
             <button
               onClick={() => setShowClientForm(!showClientForm)}
-              className="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 font-medium"
+              className="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5"
             >
-              {showClientForm ? 'Ocultar' : 'Agregar'} datos del cliente
+              {showClientForm ? '👤 Ocultar Cliente' : '👤 Agregar Cliente'}
             </button>
           </div>
 
           {showClientForm && (
-            <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg space-y-3 animate-slide-in">
+            <div className="mb-8 p-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-600 rounded-2xl space-y-4 animate-slide-in shadow-inner border-2 border-blue-100 dark:border-gray-600">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                <span>📝</span> Información del Cliente
+              </h3>
               <div className="grid grid-cols-2 gap-4">
                 <input
                   type="text"
                   placeholder="Nombre del cliente *"
                   value={clientInfo.name}
                   onChange={(e) => setClientInfo({ ...clientInfo, name: e.target.value })}
-                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-600 dark:text-white"
+                  className="px-4 py-3 border-2 border-gray-200 dark:border-gray-500 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:text-white transition-all shadow-sm"
                 />
                 <input
                   type="text"
                   placeholder="Empresa"
                   value={clientInfo.company}
                   onChange={(e) => setClientInfo({ ...clientInfo, company: e.target.value })}
-                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-600 dark:text-white"
+                  className="px-4 py-3 border-2 border-gray-200 dark:border-gray-500 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:text-white transition-all shadow-sm"
                 />
                 <input
                   type="email"
                   placeholder="Email"
                   value={clientInfo.email}
                   onChange={(e) => setClientInfo({ ...clientInfo, email: e.target.value })}
-                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-600 dark:text-white"
+                  className="px-4 py-3 border-2 border-gray-200 dark:border-gray-500 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:text-white transition-all shadow-sm"
                 />
                 <input
                   type="tel"
@@ -171,18 +177,19 @@ export const Calculator = ({
             </div>
           )}
 
-          <div className="space-y-6">
+          <div className="space-y-8">
             {/* Category Selection */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-600 p-6 rounded-2xl shadow-md border-2 border-blue-100 dark:border-gray-600">
+              <label className="block text-base font-semibold text-gray-800 dark:text-white mb-3 flex items-center gap-2">
+                <span className="text-xl">🏷️</span>
                 Categoría
               </label>
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                className="w-full px-5 py-4 border-2 border-gray-300 dark:border-gray-500 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:text-white font-medium text-lg shadow-sm transition-all cursor-pointer hover:border-blue-400"
               >
-                <option value="">Seleccione una categoría</option>
+                <option value="">✨ Seleccione una categoría</option>
                 {categories.map((cat) => (
                   <option key={cat} value={cat}>
                     {cat}
@@ -193,25 +200,30 @@ export const Calculator = ({
 
             {/* Thickness Selection */}
             {selectedCategory && thicknessOptions.length > 0 && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-700 dark:to-gray-600 p-6 rounded-2xl shadow-md border-2 border-purple-100 dark:border-gray-600">
+                <label className="block text-base font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                  <span className="text-xl">📏</span>
                   Espesor / Tipo
                 </label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-4">
                   {thicknessOptions.map((option, idx) => (
                     <button
                       key={idx}
                       onClick={() => setSelectedThickness(option)}
-                      className={`p-4 border-2 rounded-lg text-left transition-all duration-200 ${
+                      className={`p-5 border-3 rounded-xl text-left transition-all duration-200 transform hover:scale-105 ${
                         selectedThickness === option
-                          ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                          : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                          ? 'border-blue-500 bg-gradient-to-br from-blue-500 to-purple-500 text-white shadow-xl scale-105'
+                          : 'border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-600 hover:border-blue-400 hover:shadow-lg'
                       }`}
                     >
-                      <div className="font-medium text-gray-900 dark:text-white">
+                      <div className={`font-bold text-base mb-1 ${
+                        selectedThickness === option ? 'text-white' : 'text-gray-900 dark:text-white'
+                      }`}>
                         {option.espesor} {option.descripcionEspesor}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      <div className={`text-sm font-semibold ${
+                        selectedThickness === option ? 'text-white/90' : 'text-blue-600 dark:text-blue-400'
+                      }`}>
                         {formatCurrency(option.precioTotalXPie2)}/ft²
                       </div>
                     </button>
@@ -223,35 +235,52 @@ export const Calculator = ({
             {/* Square Feet Input */}
             {selectedThickness && (
               <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-600 p-6 rounded-2xl shadow-md border-2 border-green-100 dark:border-gray-600">
+                  <label className="block text-base font-semibold text-gray-800 dark:text-white mb-3 flex items-center gap-2">
+                    <span className="text-xl">📐</span>
                     Pies Cuadrados (ft²)
                   </label>
-                  <input
-                    type="number"
-                    min="0.1"
-                    step="0.1"
-                    value={squareFeet}
-                    onChange={(e) => setSquareFeet(parseFloat(e.target.value) || 0)}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white text-lg"
-                  />
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min="0.1"
+                      step="0.1"
+                      value={squareFeet}
+                      onChange={(e) => setSquareFeet(parseFloat(e.target.value) || 0)}
+                      className="w-full px-6 py-4 border-2 border-gray-300 dark:border-gray-500 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-600 dark:text-white text-2xl font-bold shadow-sm transition-all"
+                    />
+                    <span className="absolute right-5 top-4 text-gray-400 text-lg font-medium">ft²</span>
+                  </div>
                   {selectedThickness.tamanoMinimo && squareFeet < selectedThickness.tamanoMinimo && (
-                    <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">
-                      ⚠ Tamaño mínimo: {selectedThickness.tamanoMinimo} ft²
-                    </p>
+                    <div className="mt-3 p-3 bg-amber-100 dark:bg-amber-900/30 border-l-4 border-amber-500 rounded-lg">
+                      <p className="text-sm text-amber-800 dark:text-amber-300 font-medium flex items-center gap-2">
+                        <span>⚠️</span>
+                        Tamaño mínimo requerido: {selectedThickness.tamanoMinimo} ft²
+                      </p>
+                    </div>
                   )}
                 </div>
 
                 {/* LED Components Notice */}
                 {hasLightService(selectedThickness.categoria) && (
-                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                    <h4 className="font-medium text-blue-900 dark:text-blue-200 mb-2">
+                  <div className="p-6 bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/40 dark:to-cyan-900/40 border-2 border-blue-300 dark:border-blue-700 rounded-2xl shadow-lg">
+                    <h4 className="font-bold text-blue-900 dark:text-blue-200 mb-3 text-lg flex items-center gap-2">
+                      <span className="text-2xl">💡</span>
                       Incluye componentes LED:
                     </h4>
-                    <ul className="text-sm text-blue-800 dark:text-blue-300 space-y-1">
-                      <li>• Pastillas LED: B/. 1.25 c/u</li>
-                      <li>• Transformador: B/. 34.95 (rinde 15 ft²)</li>
-                      <li>• Sin base ACM</li>
+                    <ul className="text-sm text-blue-800 dark:text-blue-300 space-y-2 ml-8">
+                      <li className="flex items-center gap-2">
+                        <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                        Pastillas LED: <strong>B/. 1.25</strong> c/u
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                        Transformador: <strong>B/. 34.95</strong> (rinde 15 ft²)
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                        Sin base ACM
+                      </li>
                     </ul>
                   </div>
                 )}
@@ -437,31 +466,33 @@ export const Calculator = ({
               )}
             </div>
 
-            <div className="mt-8 flex gap-3">
+            <div className="mt-8 flex gap-4">
               <button
                 onClick={handleSaveQuote}
-                className="flex-1 bg-primary-600 hover:bg-primary-700 text-white py-3 px-6 rounded-lg font-medium transition-colors duration-200 shadow-sm"
+                className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-4 px-8 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-2xl transform hover:-translate-y-1 flex items-center justify-center gap-2"
               >
-                Guardar Cotización
+                <span>💾</span>
+                <span>Guardar Cotización</span>
               </button>
               <button
                 onClick={handleGeneratePDF}
-                className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg font-medium transition-colors duration-200 shadow-sm"
+                className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-4 px-8 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-2xl transform hover:-translate-y-1 flex items-center justify-center gap-2"
               >
-                Generar PDF
+                <span>📄</span>
+                <span>Generar PDF</span>
               </button>
             </div>
           </div>
         )}
 
         {!selectedCategory && (
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-12 text-center">
-            <div className="text-6xl mb-4">📊</div>
-            <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">
+          <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 rounded-3xl shadow-2xl p-16 text-center border-2 border-gray-100 dark:border-gray-600">
+            <div className="text-8xl mb-6 animate-bounce">📊</div>
+            <h3 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
               Seleccione una categoría para comenzar
             </h3>
-            <p className="text-gray-600 dark:text-gray-400">
-              Elija el tipo de servicio y comience a calcular el precio
+            <p className="text-gray-600 dark:text-gray-300 text-lg">
+              Elija el tipo de servicio y comience a calcular el precio de forma profesional
             </p>
           </div>
         )}
