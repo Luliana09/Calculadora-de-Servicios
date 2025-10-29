@@ -201,9 +201,20 @@ function App() {
       detalles.cantidadTransformadores = cantidadTransformadores;
       detalles.costoTransformador = cantidadTransformadores * precioTransformador;
 
-      // Costo de LEDs (cantidad ingresada por el usuario)
-      if (cantidadLED && parseFloat(cantidadLED) > 0) {
-        detalles.costoLED = parseFloat(cantidadLED) * precioPastillaLED;
+      // Verificar si hay condicional de LEDs automáticos (3 pastillas por pie²)
+      const tieneLEDAutomatico = condicionales.includes('AGREGAR 3 PASTILLAS DE LED POR CADA 1 PIE2');
+
+      if (tieneLEDAutomatico) {
+        // Calcular LEDs automáticamente: 3 pastillas por pie²
+        const cantidadLEDAutomatica = Math.ceil(pies * 3);
+        detalles.cantidadLED = cantidadLEDAutomatica;
+        detalles.costoLED = cantidadLEDAutomatica * precioPastillaLED;
+      } else {
+        // Costo de LEDs (cantidad ingresada por el usuario)
+        if (cantidadLED && parseFloat(cantidadLED) > 0) {
+          detalles.cantidadLED = parseFloat(cantidadLED);
+          detalles.costoLED = parseFloat(cantidadLED) * precioPastillaLED;
+        }
       }
     }
 
@@ -254,7 +265,7 @@ function App() {
     ];
 
     if (desglose.costoLED > 0) {
-      rows.push(['Costo Pastillas LED', `B/. ${desglose.costoLED.toFixed(2)}`]);
+      rows.push([`Pastillas LED (${desglose.cantidadLED})`, `B/. ${desglose.costoLED.toFixed(2)}`]);
     }
 
     if (desglose.costoTransformador > 0) {
@@ -362,25 +373,31 @@ function App() {
 
                 // Simplificar el texto de las condicionales
                 let textoSimplificado = '';
+                const mensajes = [];
 
-                // Condicional combinada: redondeo + grosor recomendado
-                if (cond.includes('SI AREA TOTAL DE PIES2 ≤ A 3 PIE2 REDONDIAR EL TOTAL DEL CALCULO') &&
-                    cond.includes('SI AREA TOTAL >= 3PIES CUADRADOS USAR UN GROSOR DE 4,5MM')) {
-                  textoSimplificado = '• Si el área es menor o igual a 3 pie², el total se redondeará a B/. 50.00\n• Si el área es mayor o igual a 3 pie², se recomienda usar el grosor de 4.5 MM';
+                // Verificar cada condicional y agregar mensajes
+                if (cond.includes('SI AREA TOTAL DE PIES2 ≤ A 3 PIE2 REDONDIAR EL TOTAL DEL CALCULO')) {
+                  mensajes.push('Si el área es menor o igual a 3 pie², el total se redondeará a B/. 50.00');
                 }
-                // Solo redondeo a 50.00
-                else if (cond.includes('SI AREA TOTAL DE PIES2 ≤ A 3 PIE2 REDONDIAR EL TOTAL DEL CALCULO')) {
-                  textoSimplificado = 'Si el área es menor o igual a 3 pie², el total se redondeará a B/. 50.00';
+
+                if (cond.includes('SI AREA TOTAL >= 3PIES CUADRADOS USAR UN GROSOR DE 4,5MM')) {
+                  mensajes.push('Si el área es mayor o igual a 3 pie², se recomienda usar el grosor de 4.5 MM');
                 }
-                // Solo grosor recomendado
-                else if (cond.includes('SI AREA TOTAL >= 3PIES CUADRADOS USAR UN GROSOR DE 4,5MM')) {
-                  textoSimplificado = 'Si el área es mayor o igual a 3 pie², se recomienda usar el grosor de 4.5 MM';
+
+                if (cond.includes('AGREGAR 3 PASTILLAS DE LED POR CADA 1 PIE2')) {
+                  mensajes.push('Se agregarán automáticamente 3 pastillas LED por cada pie² del área total');
                 }
-                // Redondeo a 5.00 para impresiones
-                else if (cond.includes('SI EL AREA TOTAL DE IMPRESIÓN ES ≤ A 1,5 PIE2 REDONDIAR EL TOTAL DE CALCULO A 5,00')) {
-                  textoSimplificado = 'Si el área es menor o igual a 1.5 pie², el total se redondeará a B/. 5.00';
+
+                if (cond.includes('SI EL AREA TOTAL DE IMPRESIÓN ES ≤ A 1,5 PIE2 REDONDIAR EL TOTAL DE CALCULO A 5,00')) {
+                  mensajes.push('Si el área es menor o igual a 1.5 pie², el total se redondeará a B/. 5.00');
                 }
-                else {
+
+                // Si hay múltiples mensajes, usar viñetas
+                if (mensajes.length > 1) {
+                  textoSimplificado = mensajes.map(msg => '• ' + msg).join('\n');
+                } else if (mensajes.length === 1) {
+                  textoSimplificado = mensajes[0];
+                } else {
                   textoSimplificado = cond;
                 }
 
@@ -485,23 +502,34 @@ function App() {
                 />
               </div>
 
-              {servicioSeleccionado['CON LUZ'] === 'SI' && (
-                <div className="alert-info">
-                  <h3>Información de Iluminación</h3>
-                  <p>Incluye pastillas LED (B/. 1.25 c/u) + transformador (B/. 34.95, rinde 15 ft²), sin base ACM.</p>
-                  <div className="form-group">
-                    <label>Cantidad de Pastillas LED:</label>
-                    <input
-                      type="number"
-                      value={cantidadLED}
-                      onChange={(e) => setCantidadLED(e.target.value)}
-                      className="form-control"
-                      placeholder="Ingrese cantidad de LEDs"
-                      min="0"
-                    />
+              {servicioSeleccionado['CON LUZ'] === 'SI' && (() => {
+                const cond = servicioSeleccionado['CONDICIONALES '] || servicioSeleccionado['CONDICIONALES'] || '';
+                const tieneLEDAutomatico = cond.includes('AGREGAR 3 PASTILLAS DE LED POR CADA 1 PIE2');
+
+                return (
+                  <div className="alert-info">
+                    <h3>Información de Iluminación</h3>
+                    <p>Incluye pastillas LED (B/. 1.25 c/u) + transformador (B/. 34.95, rinde 15 ft²), sin base ACM.</p>
+                    {tieneLEDAutomatico ? (
+                      <p style={{fontWeight: 'bold', color: '#0277bd'}}>
+                        Las pastillas LED se calcularán automáticamente (3 por cada pie²)
+                      </p>
+                    ) : (
+                      <div className="form-group">
+                        <label>Cantidad de Pastillas LED:</label>
+                        <input
+                          type="number"
+                          value={cantidadLED}
+                          onChange={(e) => setCantidadLED(e.target.value)}
+                          className="form-control"
+                          placeholder="Ingrese cantidad de LEDs"
+                          min="0"
+                        />
+                      </div>
+                    )}
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               {tipoSeleccionado === 'LETRAS RECORTADAS' && (
                 <div className="form-group">
@@ -569,7 +597,7 @@ function App() {
 
               {desglose.costoLED > 0 && (
                 <div className="desglose-row">
-                  <span className="label">Costo Pastillas LED:</span>
+                  <span className="label">Pastillas LED ({desglose.cantidadLED}):</span>
                   <span className="value">B/. {desglose.costoLED.toFixed(2)}</span>
                 </div>
               )}
