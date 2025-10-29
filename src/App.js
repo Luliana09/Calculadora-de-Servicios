@@ -16,6 +16,7 @@ function App() {
   const [cantidadLED, setCantidadLED] = useState('');
   const [colorPersonalizado, setColorPersonalizado] = useState(false);
   const [desglose, setDesglose] = useState(null);
+  const [aplicarITBMS, setAplicarITBMS] = useState(false);
 
   // Estados para el conversor de unidades
   const [unidadMedida, setUnidadMedida] = useState('cm');
@@ -214,8 +215,8 @@ function App() {
     // Calcular subtotal sin ITBMS (suma de todos los costos)
     detalles.subtotalSinITBMS = detalles.subtotal + detalles.costoLED + detalles.costoTransformador + detalles.costoColorPersonalizado;
 
-    // Calcular ITBMS (7% del subtotal sin ITBMS)
-    detalles.itbms = detalles.subtotalSinITBMS * 0.07;
+    // Calcular ITBMS (7% del subtotal sin ITBMS) solo si está activado
+    detalles.itbms = aplicarITBMS ? detalles.subtotalSinITBMS * 0.07 : 0;
 
     // Calcular total final (subtotal sin ITBMS + ITBMS)
     detalles.total = detalles.subtotalSinITBMS + detalles.itbms;
@@ -267,8 +268,12 @@ function App() {
       rows.push(['Color Personalizado', `B/. ${desglose.costoColorPersonalizado.toFixed(2)}`]);
     }
 
-    rows.push(['Subtotal sin ITBMS', `B/. ${desglose.subtotalSinITBMS.toFixed(2)}`]);
-    rows.push(['ITBMS (7%)', `B/. ${desglose.itbms.toFixed(2)}`]);
+    rows.push([aplicarITBMS ? 'Subtotal sin ITBMS' : 'Subtotal', `B/. ${desglose.subtotalSinITBMS.toFixed(2)}`]);
+
+    if (aplicarITBMS) {
+      rows.push(['ITBMS (7%)', `B/. ${desglose.itbms.toFixed(2)}`]);
+    }
+
     rows.push(['TOTAL', `B/. ${desglose.total.toFixed(2)}`]);
 
     autoTable(doc, {
@@ -502,6 +507,17 @@ function App() {
                 </div>
               )}
 
+              <div className="form-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={aplicarITBMS}
+                    onChange={(e) => setAplicarITBMS(e.target.checked)}
+                  />
+                  Aplicar ITBMS (7%)
+                </label>
+              </div>
+
               <button onClick={calcularPrecio} className="btn-primary">
                 Calcular Precio
               </button>
@@ -564,14 +580,16 @@ function App() {
               )}
 
               <div className="desglose-row subtotal">
-                <span className="label">Subtotal sin ITBMS:</span>
+                <span className="label">Subtotal{aplicarITBMS ? ' sin ITBMS' : ''}:</span>
                 <span className="value">B/. {desglose.subtotalSinITBMS.toFixed(2)}</span>
               </div>
 
-              <div className="desglose-row">
-                <span className="label">ITBMS (7%):</span>
-                <span className="value">B/. {desglose.itbms.toFixed(2)}</span>
-              </div>
+              {aplicarITBMS && (
+                <div className="desglose-row">
+                  <span className="label">ITBMS (7%):</span>
+                  <span className="value">B/. {desglose.itbms.toFixed(2)}</span>
+                </div>
+              )}
 
               <div className="desglose-row total">
                 <span className="label">TOTAL:</span>
