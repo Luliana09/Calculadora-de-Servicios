@@ -17,6 +17,11 @@ function App() {
   const [colorPersonalizado, setColorPersonalizado] = useState(false);
   const [desglose, setDesglose] = useState(null);
 
+  // Estados para el conversor de unidades
+  const [unidadMedida, setUnidadMedida] = useState('cm');
+  const [ancho, setAncho] = useState('');
+  const [alto, setAlto] = useState('');
+
   // Cargar datos del CSV
   useEffect(() => {
     fetch('/servicios.csv')
@@ -74,6 +79,44 @@ function App() {
   const parsePrecio = (precioStr) => {
     if (!precioStr) return 0;
     return parseFloat(precioStr.replace(/\$/g, '').replace(/,/g, '.').trim());
+  };
+
+  // Función para calcular pies cuadrados desde ancho y alto
+  const calcularPiesCuadrados = () => {
+    if (!ancho || !alto) return;
+
+    const anchoNum = parseFloat(ancho);
+    const altoNum = parseFloat(alto);
+
+    if (isNaN(anchoNum) || isNaN(altoNum) || anchoNum <= 0 || altoNum <= 0) {
+      alert('Por favor ingrese valores válidos de ancho y alto');
+      return;
+    }
+
+    let areaEnPies2 = 0;
+
+    switch (unidadMedida) {
+      case 'cm':
+        // Convertir cm² a ft²: 1 ft² = 929.0304 cm²
+        areaEnPies2 = (anchoNum * altoNum) / 929.0304;
+        break;
+      case 'in':
+        // Convertir in² a ft²: 1 ft² = 144 in²
+        areaEnPies2 = (anchoNum * altoNum) / 144;
+        break;
+      case 'ft':
+        // Ya está en pies
+        areaEnPies2 = anchoNum * altoNum;
+        break;
+      case 'm':
+        // Convertir m² a ft²: 1 m² = 10.7639 ft²
+        areaEnPies2 = (anchoNum * altoNum) * 10.7639;
+        break;
+      default:
+        break;
+    }
+
+    setPies2(areaEnPies2.toFixed(2));
   };
 
   // Calcular precio
@@ -324,6 +367,86 @@ function App() {
                 );
               })()}
 
+              <div className="conversor-unidades">
+                <h3>Ingrese las medidas para obtener el costo:</h3>
+
+                <div className="unidades-selector">
+                  <label>Unidad de Medida:</label>
+                  <div className="unidades-botones">
+                    <button
+                      type="button"
+                      className={`btn-unidad ${unidadMedida === 'cm' ? 'active' : ''}`}
+                      onClick={() => setUnidadMedida('cm')}
+                    >
+                      Centímetros (cm)
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn-unidad ${unidadMedida === 'in' ? 'active' : ''}`}
+                      onClick={() => setUnidadMedida('in')}
+                    >
+                      Pulgadas (in)
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn-unidad ${unidadMedida === 'ft' ? 'active' : ''}`}
+                      onClick={() => setUnidadMedida('ft')}
+                    >
+                      Pies (ft)
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn-unidad ${unidadMedida === 'm' ? 'active' : ''}`}
+                      onClick={() => setUnidadMedida('m')}
+                    >
+                      Metros (m)
+                    </button>
+                  </div>
+                </div>
+
+                <div className="medidas-inputs">
+                  <div className="form-group">
+                    <label>Ancho:</label>
+                    <div className="input-con-unidad">
+                      <input
+                        type="number"
+                        value={ancho}
+                        onChange={(e) => setAncho(e.target.value)}
+                        className="form-control"
+                        placeholder={`Ej: 120`}
+                        step="0.01"
+                        min="0"
+                      />
+                      <span className="unidad-label">{unidadMedida}</span>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Alto:</label>
+                    <div className="input-con-unidad">
+                      <input
+                        type="number"
+                        value={alto}
+                        onChange={(e) => setAlto(e.target.value)}
+                        className="form-control"
+                        placeholder={`Ej: 80`}
+                        step="0.01"
+                        min="0"
+                      />
+                      <span className="unidad-label">{unidadMedida}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={calcularPiesCuadrados}
+                  className="btn-calcular-area"
+                >
+                  Calcular Área en Pies²
+                </button>
+              </div>
+
               <div className="form-group">
                 <label>Pies Cuadrados (ft²):</label>
                 <input
@@ -331,7 +454,7 @@ function App() {
                   value={pies2}
                   onChange={(e) => setPies2(e.target.value)}
                   className="form-control"
-                  placeholder="Ingrese los pies cuadrados"
+                  placeholder="Se calculará automáticamente o ingrese directamente"
                   step="0.01"
                   min="0"
                 />

@@ -194,6 +194,108 @@ select.form-control {
   transform: translateY(0);
 }
 
+/* Conversor de Unidades */
+.conversor-unidades {
+  background: #e8f4f8;
+  border: 2px solid #4fc3f7;
+  padding: 25px;
+  border-radius: 10px;
+  margin: 20px 0;
+}
+
+.conversor-unidades h3 {
+  color: #0277bd;
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+}
+
+.unidades-selector {
+  margin-bottom: 20px;
+}
+
+.unidades-selector label {
+  display: block;
+  margin-bottom: 10px;
+  color: #0277bd;
+  font-weight: 600;
+}
+
+.unidades-botones {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.btn-unidad {
+  background: white;
+  border: 2px solid #4fc3f7;
+  padding: 12px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #0277bd;
+  transition: all 0.3s ease;
+}
+
+.btn-unidad:hover {
+  background: #e1f5fe;
+  transform: translateY(-2px);
+}
+
+.btn-unidad.active {
+  background: #4fc3f7;
+  color: white;
+  border-color: #0277bd;
+}
+
+.medidas-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.input-con-unidad {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-con-unidad input {
+  flex: 1;
+  padding-right: 50px;
+}
+
+.unidad-label {
+  position: absolute;
+  right: 15px;
+  color: #0277bd;
+  font-weight: 600;
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+
+.btn-calcular-area {
+  background: linear-gradient(135deg, #4fc3f7 0%, #0277bd 100%);
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.btn-calcular-area:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(79, 195, 247, 0.4);
+}
+
+.btn-calcular-area:active {
+  transform: translateY(0);
+}
+
 .resultado-section {
   background: #f8f9fa;
   padding: 30px;
@@ -337,5 +439,17 @@ select.form-control {
 
   .desglose-row .label {
     font-weight: 700;
+  }
+
+  .unidades-botones {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .medidas-inputs {
+    grid-template-columns: 1fr;
+  }
+
+  .conversor-unidades {
+    padding: 15px;
   }
 }
