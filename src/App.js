@@ -353,10 +353,27 @@ function App() {
             <>
               {(() => {
                 const cond = servicioSeleccionado['CONDICIONALES '] || servicioSeleccionado['CONDICIONALES'] || '';
-                return cond && cond.trim() !== 'N/A' && (
+                if (!cond || cond.trim() === 'N/A') return null;
+
+                // Simplificar el texto de las condicionales
+                let textoSimplificado = cond;
+
+                // Reemplazar texto específico para grosor
+                if (cond.includes('SI AREA TOTAL >= 3PIES CUADRADOS USAR UN GROSOR DE 4,5MM')) {
+                  textoSimplificado = 'Si el área de pie² es mayor o igual a 3 pie², usar el grosor 4.5 MM.';
+                }
+                // Agregar más reemplazos si hay otras condicionales
+                else if (cond.includes('SI AREA TOTAL DE PIES2 ≤ A 3 PIE2 REDONDIAR EL TOTAL DEL CALCULO')) {
+                  textoSimplificado = 'Si el área es menor o igual a 3 pie², el total se redondeará a B/. 50.00';
+                }
+                else if (cond.includes('SI EL AREA TOTAL DE IMPRESIÓN ES ≤ A 1,5 PIE2 REDONDIAR EL TOTAL DE CALCULO A 5,00')) {
+                  textoSimplificado = 'Si el área es menor o igual a 1.5 pie², el total se redondeará a B/. 5.00';
+                }
+
+                return (
                   <div className="alert-info" style={{marginTop: '15px'}}>
                     <h3>Nota Importante</h3>
-                    <p>{cond}</p>
+                    <p>{textoSimplificado}</p>
                   </div>
                 );
               })()}
