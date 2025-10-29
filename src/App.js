@@ -109,11 +109,27 @@ function App() {
     // Calcular subtotal base
     let subtotal = pies * precioTotalPorPie;
 
-    // Aplicar condicionales del CSV
-    if (condicionales.includes('SI ES ≤ A 3 PIE2 REDONDIAR A 50,00') && pies <= 3) {
-      subtotal = 50;
-    } else if (condicionales.includes('SI ES ≤ A 1,5 PIE2 REDONDIAR A 5,00') && pies <= 1.5) {
-      subtotal = 5;
+    // Aplicar condicionales del CSV de forma dinámica
+    if (condicionales && condicionales.trim() !== 'N/A') {
+      // Patrón para "SI ES ≤ A X PIE2 REDONDIAR A Y"
+      const redondeoMenorMatch = condicionales.match(/SI ES ≤ A ([\d,.]+) PIE2? REDONDIAR A ([\d,.]+)/i);
+      if (redondeoMenorMatch) {
+        const limite = parseFloat(redondeoMenorMatch[1].replace(',', '.'));
+        const valorRedondeo = parseFloat(redondeoMenorMatch[2].replace(',', '.'));
+        if (pies <= limite) {
+          subtotal = valorRedondeo;
+        }
+      }
+
+      // Patrón para "SI ES ≥ A X PIE2 REDONDIAR A Y" (por si existe)
+      const redondeoMayorMatch = condicionales.match(/SI ES ≥ A ([\d,.]+) PIE2? REDONDIAR A ([\d,.]+)/i);
+      if (redondeoMayorMatch) {
+        const limite = parseFloat(redondeoMayorMatch[1].replace(',', '.'));
+        const valorRedondeo = parseFloat(redondeoMayorMatch[2].replace(',', '.'));
+        if (pies >= limite) {
+          subtotal = valorRedondeo;
+        }
+      }
     }
 
     // Validar tamaño mínimo
