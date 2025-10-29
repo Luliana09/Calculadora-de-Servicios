@@ -340,17 +340,11 @@ function App() {
                 className="form-control"
               >
                 <option value="">Seleccione una opción</option>
-                {opcionesEspesor.map((opcion, idx) => {
-                  const condicionalTexto = opcion['CONDICIONALES '] || opcion['CONDICIONALES'] || '';
-                  const condicional = condicionalTexto && condicionalTexto.trim() !== 'N/A'
-                    ? ` - ${condicionalTexto}`
-                    : '';
-                  return (
-                    <option key={idx} value={idx}>
-                      {opcion['ESPESOR EN MILIMETROS']} {opcion['MILIMETRO(MM) MAS FUERTE']}{condicional}
-                    </option>
-                  );
-                })}
+                {opcionesEspesor.map((opcion, idx) => (
+                  <option key={idx} value={idx}>
+                    {opcion['ESPESOR EN MILIMETROS']} {opcion['MILIMETRO(MM) MAS FUERTE']}
+                  </option>
+                ))}
               </select>
             </div>
           )}
