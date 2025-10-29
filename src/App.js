@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Papa from 'papaparse';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import './App.css';
 
 function App() {
@@ -198,7 +198,7 @@ function App() {
 
     rows.push(['TOTAL', `B/. ${desglose.total.toFixed(2)}`]);
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: 50,
       head: [['Concepto', 'Valor']],
       body: rows,
@@ -267,17 +267,30 @@ function App() {
                 className="form-control"
               >
                 <option value="">Seleccione una opción</option>
-                {opcionesEspesor.map((opcion, idx) => (
-                  <option key={idx} value={idx}>
-                    {opcion['ESPESOR EN MILIMETROS']} {opcion['MILIMETRO(MM) MAS FUERTE']} - B/. {opcion['PRECIO TOTAL X PIE2']}
-                  </option>
-                ))}
+                {opcionesEspesor.map((opcion, idx) => {
+                  const condicional = opcion.CONDICIONALES && opcion.CONDICIONALES.trim() !== 'N/A'
+                    ? ` - ${opcion.CONDICIONALES}`
+                    : '';
+                  return (
+                    <option key={idx} value={idx}>
+                      {opcion['ESPESOR EN MILIMETROS']} {opcion['MILIMETRO(MM) MAS FUERTE']}{condicional}
+                    </option>
+                  );
+                })}
               </select>
             </div>
           )}
 
           {servicioSeleccionado && (
             <>
+              {servicioSeleccionado.CONDICIONALES &&
+               servicioSeleccionado.CONDICIONALES.trim() !== 'N/A' && (
+                <div className="alert-info" style={{marginTop: '15px'}}>
+                  <h3>Nota Importante</h3>
+                  <p>{servicioSeleccionado.CONDICIONALES}</p>
+                </div>
+              )}
+
               <div className="form-group">
                 <label>Pies Cuadrados (ft²):</label>
                 <input
