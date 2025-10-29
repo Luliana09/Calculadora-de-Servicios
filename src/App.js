@@ -90,7 +90,7 @@ function App() {
     }
 
     const precioBase = parsePrecio(servicioSeleccionado['PRECIO BASE']);
-    const precioPorPie = parsePrecio(servicioSeleccionado['MILIMETRO(MM) MAS FUERTE']);
+    const precioPorPie = parsePrecio(servicioSeleccionado['PRECIO X PIE2']);
     const condicionales = servicioSeleccionado.CONDICIONALES || '';
     const tamanoMinimo = parseFloat(servicioSeleccionado['TAMAÑO MINIMO EN PIE2']) || 0;
     const conLuz = servicioSeleccionado['CON LUZ'] === 'SI';
