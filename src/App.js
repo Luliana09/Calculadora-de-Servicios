@@ -17,6 +17,7 @@ function App() {
   const [colorPersonalizado, setColorPersonalizado] = useState(false);
   const [desglose, setDesglose] = useState(null);
   const [aplicarITBMS, setAplicarITBMS] = useState(false);
+  const [incluirTransformador, setIncluirTransformador] = useState(false);
 
   // Estados para el conversor de unidades
   const [unidadMedida, setUnidadMedida] = useState('cm');
@@ -196,10 +197,12 @@ function App() {
       const precioTransformador = 34.95;
       const rendimientoTransformador = 15; // ft² por transformador
 
-      // Calcular cantidad de transformadores necesarios (redondear hacia arriba)
-      const cantidadTransformadores = Math.ceil(pies / rendimientoTransformador);
-      detalles.cantidadTransformadores = cantidadTransformadores;
-      detalles.costoTransformador = cantidadTransformadores * precioTransformador;
+      // Calcular transformadores solo si el usuario lo selecciona
+      if (incluirTransformador) {
+        const cantidadTransformadores = Math.ceil(pies / rendimientoTransformador);
+        detalles.cantidadTransformadores = cantidadTransformadores;
+        detalles.costoTransformador = cantidadTransformadores * precioTransformador;
+      }
 
       // Verificar si hay condicional de LEDs automáticos (3 pastillas por pie²)
       const tieneLEDAutomatico = condicionales.includes('AGREGAR 3 PASTILLAS DE LED POR CADA 1 PIE2');
@@ -509,7 +512,8 @@ function App() {
                 return (
                   <div className="alert-info">
                     <h3>Información de Iluminación</h3>
-                    <p>Incluye pastillas LED (B/. 1.25 c/u) + transformador (B/. 34.95, rinde 15 ft²), sin base ACM.</p>
+                    <p>Incluye pastillas LED (B/. 1.25 c/u), sin base ACM.</p>
+
                     {tieneLEDAutomatico ? (
                       <p style={{fontWeight: 'bold', color: '#0277bd'}}>
                         Las pastillas LED se calcularán automáticamente (3 por cada pie²)
@@ -527,6 +531,20 @@ function App() {
                         />
                       </div>
                     )}
+
+                    <div className="form-group" style={{marginTop: '15px'}}>
+                      <label className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={incluirTransformador}
+                          onChange={(e) => setIncluirTransformador(e.target.checked)}
+                        />
+                        Incluir Transformador (B/. 34.95, rinde 15 ft²)
+                      </label>
+                      <p style={{fontSize: '0.9em', color: '#666', marginTop: '8px', marginLeft: '25px'}}>
+                        <strong>Nota:</strong> El transformador solo aplica cuando las luces sean de colores variados. Si es blanco, no aplica.
+                      </p>
+                    </div>
                   </div>
                 );
               })()}
