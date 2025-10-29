@@ -106,6 +106,8 @@ function App() {
       costoTransformador: 0,
       cantidadTransformadores: 0,
       costoColorPersonalizado: 0,
+      subtotalSinITBMS: 0,
+      itbms: 0,
       total: 0
     };
 
@@ -166,8 +168,14 @@ function App() {
       detalles.costoColorPersonalizado = pies * 2.00;
     }
 
-    // Calcular total
-    detalles.total = detalles.subtotal + detalles.costoLED + detalles.costoTransformador + detalles.costoColorPersonalizado;
+    // Calcular subtotal sin ITBMS (suma de todos los costos)
+    detalles.subtotalSinITBMS = detalles.subtotal + detalles.costoLED + detalles.costoTransformador + detalles.costoColorPersonalizado;
+
+    // Calcular ITBMS (7% del subtotal sin ITBMS)
+    detalles.itbms = detalles.subtotalSinITBMS * 0.07;
+
+    // Calcular total final (subtotal sin ITBMS + ITBMS)
+    detalles.total = detalles.subtotalSinITBMS + detalles.itbms;
 
     setDesglose(detalles);
   };
@@ -216,6 +224,8 @@ function App() {
       rows.push(['Color Personalizado', `B/. ${desglose.costoColorPersonalizado.toFixed(2)}`]);
     }
 
+    rows.push(['Subtotal sin ITBMS', `B/. ${desglose.subtotalSinITBMS.toFixed(2)}`]);
+    rows.push(['ITBMS (7%)', `B/. ${desglose.itbms.toFixed(2)}`]);
     rows.push(['TOTAL', `B/. ${desglose.total.toFixed(2)}`]);
 
     autoTable(doc, {
@@ -418,6 +428,16 @@ function App() {
                   <span className="value">B/. {desglose.costoColorPersonalizado.toFixed(2)}</span>
                 </div>
               )}
+
+              <div className="desglose-row subtotal">
+                <span className="label">Subtotal sin ITBMS:</span>
+                <span className="value">B/. {desglose.subtotalSinITBMS.toFixed(2)}</span>
+              </div>
+
+              <div className="desglose-row">
+                <span className="label">ITBMS (7%):</span>
+                <span className="value">B/. {desglose.itbms.toFixed(2)}</span>
+              </div>
 
               <div className="desglose-row total">
                 <span className="label">TOTAL:</span>
