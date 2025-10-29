@@ -89,15 +89,18 @@ function App() {
       return;
     }
 
-    const precioTotalPorPie = parsePrecio(servicioSeleccionado['PRECIO TOTAL X PIE2']);
+    const precioBase = parsePrecio(servicioSeleccionado['PRECIO BASE']);
+    const precioPorPie = parsePrecio(servicioSeleccionado['MILIMETRO(MM) MAS FUERTE']);
     const condicionales = servicioSeleccionado.CONDICIONALES || '';
     const tamanoMinimo = parseFloat(servicioSeleccionado['TAMAÑO MINIMO EN PIE2']) || 0;
+    const conLuz = servicioSeleccionado['CON LUZ'] === 'SI';
 
     let detalles = {
       servicio: `${tipoSeleccionado} - ${categoriaSeleccionada}`,
       espesor: servicioSeleccionado['ESPESOR EN MILIMETROS'],
       pies2: pies,
-      precioPorPie2: precioTotalPorPie,
+      precioBase: precioBase,
+      precioPorPie2: precioPorPie,
       subtotal: 0,
       costoLED: 0,
       costoTransformador: 0,
@@ -106,28 +109,29 @@ function App() {
       total: 0
     };
 
-    // Calcular subtotal base
-    let subtotal = pies * precioTotalPorPie;
+    // Calcular subtotal base: (precio base * pies) + (precio por pie * pies)
+    let subtotal = (precioBase * pies) + (precioPorPie * pies);
 
     // Aplicar condicionales del CSV de forma dinámica
     if (condicionales && condicionales.trim() !== 'N/A') {
-      // Patrón para "SI ES ≤ A X PIE2 REDONDIAR A Y"
-      const redondeoMenorMatch = condicionales.match(/SI ES ≤ A ([\d,.]+) PIE2? REDONDIAR A ([\d,.]+)/i);
-      if (redondeoMenorMatch) {
-        const limite = parseFloat(redondeoMenorMatch[1].replace(',', '.'));
-        const valorRedondeo = parseFloat(redondeoMenorMatch[2].replace(',', '.'));
+      // Patrón para "SI AREA TOTAL DE PIES2 ≤ A X PIE2 REDONDIAR EL TOTAL DEL CALCULO Y"
+      // O "SI EL AREA TOTAL DE IMPRESIÓN ES ≤ A X PIE2 REDONDIAR EL TOTAL DE CALCULO A Y"
+      const redondeoMatch = condicionales.match(/≤ A ([\d,.]+) PIE2?\s+REDONDIAR\s+EL TOTAL\s+(?:DEL|DE)\s+CALCULO\s+(?:A\s+)?([\d,.]+)/i);
+      if (redondeoMatch) {
+        const limite = parseFloat(redondeoMatch[1].replace(',', '.'));
+        const valorRedondeo = parseFloat(redondeoMatch[2].replace(',', '.'));
         if (pies <= limite) {
           subtotal = valorRedondeo;
         }
       }
 
-      // Patrón para "SI ES ≥ A X PIE2 REDONDIAR A Y" (por si existe)
-      const redondeoMayorMatch = condicionales.match(/SI ES ≥ A ([\d,.]+) PIE2? REDONDIAR A ([\d,.]+)/i);
-      if (redondeoMayorMatch) {
-        const limite = parseFloat(redondeoMayorMatch[1].replace(',', '.'));
-        const valorRedondeo = parseFloat(redondeoMayorMatch[2].replace(',', '.'));
+      // Patrón para "SI AREA TOTAL >= X PIES CUADRADOS USAR UN GROSOR DE Y MM"
+      const grosorRecomendadoMatch = condicionales.match(/≥ ([\d,.]+)\s*PIES CUADRADOS USAR UN GROSOR DE ([\d,.]+)\s*MM/i);
+      if (grosorRecomendadoMatch) {
+        const limite = parseFloat(grosorRecomendadoMatch[1].replace(',', '.'));
+        const grosorRecomendado = grosorRecomendadoMatch[2];
         if (pies >= limite) {
-          subtotal = valorRedondeo;
+          detalles.grosorRecomendado = `Se recomienda usar grosor de ${grosorRecomendado}mm para esta cantidad de pies cuadrados`;
         }
       }
     }
@@ -140,8 +144,8 @@ function App() {
 
     detalles.subtotal = subtotal;
 
-    // Lógica para servicios CON LUZ
-    if (categoriaSeleccionada.includes('CON LUZ')) {
+    // Lógica para servicios CON LUZ (usando la columna CON LUZ del CSV)
+    if (conLuz) {
       const precioPastillaLED = 1.25;
       const precioTransformador = 34.95;
       const rendimientoTransformador = 15; // ft² por transformador
@@ -320,7 +324,7 @@ function App() {
                 />
               </div>
 
-              {categoriaSeleccionada.includes('CON LUZ') && (
+              {servicioSeleccionado['CON LUZ'] === 'SI' && (
                 <div className="alert-info">
                   <h3>Información de Iluminación</h3>
                   <p>Incluye pastillas LED (B/. 1.25 c/u) + transformador (B/. 34.95, rinde 15 ft²), sin base ACM.</p>
@@ -361,6 +365,14 @@ function App() {
         {desglose && (
           <div className="resultado-section" id="resultado-impresion">
             <h2>Resumen de Cotización</h2>
+
+            {desglose.grosorRecomendado && (
+              <div className="alert-info" style={{marginBottom: '20px'}}>
+                <h3>Recomendación</h3>
+                <p>{desglose.grosorRecomendado}</p>
+              </div>
+            )}
+
             <div className="desglose">
               <div className="desglose-row">
                 <span className="label">Servicio:</span>
@@ -375,8 +387,8 @@ function App() {
                 <span className="value">{desglose.pies2} ft²</span>
               </div>
               <div className="desglose-row">
-                <span className="label">Precio por Pie²:</span>
-                <span className="value">B/. {desglose.precioPorPie2.toFixed(2)}</span>
+                <span className="label">Precio Base:</span>
+                <span className="value">B/. {desglose.precioBase.toFixed(2)}</span>
               </div>
               <div className="desglose-row subtotal">
                 <span className="label">Subtotal:</span>
