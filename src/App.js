@@ -361,24 +361,33 @@ function App() {
                 if (!cond || cond.trim() === 'N/A') return null;
 
                 // Simplificar el texto de las condicionales
-                let textoSimplificado = cond;
+                let textoSimplificado = '';
 
-                // Reemplazar texto específico para grosor
-                if (cond.includes('SI AREA TOTAL >= 3PIES CUADRADOS USAR UN GROSOR DE 4,5MM')) {
-                  textoSimplificado = 'Si el área de pie² es mayor o igual a 3 pie², usar el grosor 4.5 MM.';
+                // Condicional combinada: redondeo + grosor recomendado
+                if (cond.includes('SI AREA TOTAL DE PIES2 ≤ A 3 PIE2 REDONDIAR EL TOTAL DEL CALCULO') &&
+                    cond.includes('SI AREA TOTAL >= 3PIES CUADRADOS USAR UN GROSOR DE 4,5MM')) {
+                  textoSimplificado = '• Si el área es menor o igual a 3 pie², el total se redondeará a B/. 50.00\n• Si el área es mayor o igual a 3 pie², se recomienda usar el grosor de 4.5 MM';
                 }
-                // Agregar más reemplazos si hay otras condicionales
+                // Solo redondeo a 50.00
                 else if (cond.includes('SI AREA TOTAL DE PIES2 ≤ A 3 PIE2 REDONDIAR EL TOTAL DEL CALCULO')) {
                   textoSimplificado = 'Si el área es menor o igual a 3 pie², el total se redondeará a B/. 50.00';
                 }
+                // Solo grosor recomendado
+                else if (cond.includes('SI AREA TOTAL >= 3PIES CUADRADOS USAR UN GROSOR DE 4,5MM')) {
+                  textoSimplificado = 'Si el área es mayor o igual a 3 pie², se recomienda usar el grosor de 4.5 MM';
+                }
+                // Redondeo a 5.00 para impresiones
                 else if (cond.includes('SI EL AREA TOTAL DE IMPRESIÓN ES ≤ A 1,5 PIE2 REDONDIAR EL TOTAL DE CALCULO A 5,00')) {
                   textoSimplificado = 'Si el área es menor o igual a 1.5 pie², el total se redondeará a B/. 5.00';
+                }
+                else {
+                  textoSimplificado = cond;
                 }
 
                 return (
                   <div className="alert-info" style={{marginTop: '15px'}}>
                     <h3>Nota Importante</h3>
-                    <p>{textoSimplificado}</p>
+                    <p style={{whiteSpace: 'pre-line'}}>{textoSimplificado}</p>
                   </div>
                 );
               })()}
