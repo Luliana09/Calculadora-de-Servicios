@@ -91,7 +91,7 @@ function App() {
 
     const precioBase = parsePrecio(servicioSeleccionado['PRECIO BASE']);
     const precioPorPie = parsePrecio(servicioSeleccionado['PRECIO X PIE2']);
-    const condicionales = servicioSeleccionado.CONDICIONALES || '';
+    const condicionales = servicioSeleccionado['CONDICIONALES '] || servicioSeleccionado['CONDICIONALES'] || '';
     const tamanoMinimo = parseFloat(servicioSeleccionado['TAMAÑO MINIMO EN PIE2']) || 0;
     const conLuz = servicioSeleccionado['CON LUZ'] === 'SI';
 
@@ -288,8 +288,9 @@ function App() {
               >
                 <option value="">Seleccione una opción</option>
                 {opcionesEspesor.map((opcion, idx) => {
-                  const condicional = opcion.CONDICIONALES && opcion.CONDICIONALES.trim() !== 'N/A'
-                    ? ` - ${opcion.CONDICIONALES}`
+                  const condicionalTexto = opcion['CONDICIONALES '] || opcion['CONDICIONALES'] || '';
+                  const condicional = condicionalTexto && condicionalTexto.trim() !== 'N/A'
+                    ? ` - ${condicionalTexto}`
                     : '';
                   return (
                     <option key={idx} value={idx}>
@@ -303,13 +304,15 @@ function App() {
 
           {servicioSeleccionado && (
             <>
-              {servicioSeleccionado.CONDICIONALES &&
-               servicioSeleccionado.CONDICIONALES.trim() !== 'N/A' && (
-                <div className="alert-info" style={{marginTop: '15px'}}>
-                  <h3>Nota Importante</h3>
-                  <p>{servicioSeleccionado.CONDICIONALES}</p>
-                </div>
-              )}
+              {(() => {
+                const cond = servicioSeleccionado['CONDICIONALES '] || servicioSeleccionado['CONDICIONALES'] || '';
+                return cond && cond.trim() !== 'N/A' && (
+                  <div className="alert-info" style={{marginTop: '15px'}}>
+                    <h3>Nota Importante</h3>
+                    <p>{cond}</p>
+                  </div>
+                );
+              })()}
 
               <div className="form-group">
                 <label>Pies Cuadrados (ft²):</label>
