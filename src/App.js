@@ -123,7 +123,14 @@ function App() {
         break;
     }
 
-    setPies2(areaEnPies2.toFixed(2));
+    const areaFormateada = areaEnPies2.toFixed(2);
+
+    // Guardar en el campo correspondiente según el método
+    if (metodoCalculo === 'letra') {
+      setTamanoLetra(areaFormateada);
+    } else {
+      setPies2(areaFormateada);
+    }
   };
 
   // Calcular precio
@@ -516,20 +523,93 @@ function App() {
                 <div className="conversor-unidades">
                   <h3>Cálculo por Tamaño de Letra:</h3>
 
+                  <div className="unidades-selector">
+                    <label>Unidad de Medida:</label>
+                    <div className="unidades-botones">
+                      <button
+                        type="button"
+                        className={`btn-unidad ${unidadMedida === 'cm' ? 'active' : ''}`}
+                        onClick={() => setUnidadMedida('cm')}
+                      >
+                        Centímetros (cm)
+                      </button>
+                      <button
+                        type="button"
+                        className={`btn-unidad ${unidadMedida === 'in' ? 'active' : ''}`}
+                        onClick={() => setUnidadMedida('in')}
+                      >
+                        Pulgadas (in)
+                      </button>
+                      <button
+                        type="button"
+                        className={`btn-unidad ${unidadMedida === 'ft' ? 'active' : ''}`}
+                        onClick={() => setUnidadMedida('ft')}
+                      >
+                        Pies (ft)
+                      </button>
+                      <button
+                        type="button"
+                        className={`btn-unidad ${unidadMedida === 'm' ? 'active' : ''}`}
+                        onClick={() => setUnidadMedida('m')}
+                      >
+                        Metros (m)
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="medidas-inputs">
+                    <div className="form-group">
+                      <label>Ancho de Letra:</label>
+                      <div className="input-con-unidad">
+                        <input
+                          type="number"
+                          value={ancho}
+                          onChange={(e) => setAncho(e.target.value)}
+                          className="form-control"
+                          placeholder={`Ej: 30`}
+                          step="0.01"
+                          min="0"
+                        />
+                        <span className="unidad-label">{unidadMedida}</span>
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label>Alto de Letra:</label>
+                      <div className="input-con-unidad">
+                        <input
+                          type="number"
+                          value={alto}
+                          onChange={(e) => setAlto(e.target.value)}
+                          className="form-control"
+                          placeholder={`Ej: 40`}
+                          step="0.01"
+                          min="0"
+                        />
+                        <span className="unidad-label">{unidadMedida}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={calcularPiesCuadrados}
+                    className="btn-calcular-area"
+                  >
+                    Calcular Tamaño de Letra en Pies²
+                  </button>
+
                   <div className="form-group">
-                    <label>Tamaño de Letra (en pie²):</label>
+                    <label>Tamaño de Letra (ft²):</label>
                     <input
                       type="number"
                       value={tamanoLetra}
                       onChange={(e) => setTamanoLetra(e.target.value)}
                       className="form-control"
-                      placeholder="Ej: 0.5"
+                      placeholder="Se calculará automáticamente o ingrese directamente"
                       step="0.01"
                       min="0"
                     />
-                    <small style={{color: '#666', fontSize: '0.9em', marginTop: '5px', display: 'block'}}>
-                      Ingrese el tamaño de una letra en pies cuadrados
-                    </small>
                   </div>
 
                   <div className="form-group">
