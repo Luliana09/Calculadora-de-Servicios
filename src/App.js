@@ -19,6 +19,11 @@ function App() {
   const [aplicarITBMS, setAplicarITBMS] = useState(false);
   const [incluirTransformador, setIncluirTransformador] = useState(false);
 
+  // Estados para método de cálculo
+  const [metodoCalculo, setMetodoCalculo] = useState('area'); // 'area' o 'letra'
+  const [tamanoLetra, setTamanoLetra] = useState(''); // en pie²
+  const [cantidadLetras, setCantidadLetras] = useState('');
+
   // Estados para el conversor de unidades
   const [unidadMedida, setUnidadMedida] = useState('cm');
   const [ancho, setAncho] = useState('');
@@ -123,15 +128,49 @@ function App() {
 
   // Calcular precio
   const calcularPrecio = () => {
-    if (!servicioSeleccionado || !pies2) {
-      alert('Por favor complete todos los campos requeridos');
-      return;
+    // Validación según método de cálculo
+    const esLetraFormadaORecortada = tipoSeleccionado === 'LETRAS FORMADAS' || tipoSeleccionado === 'LETRAS RECORTADAS';
+
+    if (esLetraFormadaORecortada && metodoCalculo === 'letra') {
+      // Validar para método por letra
+      if (!servicioSeleccionado || !tamanoLetra || !cantidadLetras) {
+        alert('Por favor complete todos los campos requeridos (tamaño de letra y cantidad)');
+        return;
+      }
+
+      const tamano = parseFloat(tamanoLetra);
+      const cantidad = parseInt(cantidadLetras);
+
+      if (isNaN(tamano) || tamano <= 0) {
+        alert('Por favor ingrese un tamaño válido de letra en pies cuadrados');
+        return;
+      }
+
+      if (isNaN(cantidad) || cantidad <= 0) {
+        alert('Por favor ingrese una cantidad válida de letras');
+        return;
+      }
+    } else {
+      // Validar para método por área
+      if (!servicioSeleccionado || !pies2) {
+        alert('Por favor complete todos los campos requeridos');
+        return;
+      }
+
+      const pies = parseFloat(pies2);
+      if (isNaN(pies) || pies <= 0) {
+        alert('Por favor ingrese un valor válido de pies cuadrados');
+        return;
+      }
     }
 
-    const pies = parseFloat(pies2);
-    if (isNaN(pies) || pies <= 0) {
-      alert('Por favor ingrese un valor válido de pies cuadrados');
-      return;
+    // Calcular pies² totales según el método
+    let pies;
+    if (esLetraFormadaORecortada && metodoCalculo === 'letra') {
+      // Calcular área total: tamaño de letra * cantidad de letras
+      pies = parseFloat(tamanoLetra) * parseInt(cantidadLetras);
+    } else {
+      pies = parseFloat(pies2);
     }
 
     const precioBase = parsePrecio(servicioSeleccionado['PRECIO BASE']);
@@ -146,6 +185,11 @@ function App() {
       pies2: pies,
       precioBase: precioBase,
       precioPorPie2: precioPorPie,
+      metodoCalculo: metodoCalculo,
+      tamanoLetra: metodoCalculo === 'letra' ? parseFloat(tamanoLetra) : null,
+      cantidadLetras: metodoCalculo === 'letra' ? parseInt(cantidadLetras) : null,
+      letrasPorLamina: null,
+      cantidadLaminas: null,
       subtotal: 0,
       costoLED: 0,
       costoTransformador: 0,
@@ -156,8 +200,31 @@ function App() {
       total: 0
     };
 
-    // Calcular subtotal base: (precio base * pies) + (precio por pie * pies)
-    let subtotal = (precioBase * pies) + (precioPorPie * pies);
+    // Calcular subtotal según el método
+    let subtotal;
+
+    if (esLetraFormadaORecortada && metodoCalculo === 'letra') {
+      // Método por tamaño de letra
+      const TAMANO_LAMINA = 32; // pie²
+      const tamanoLetraNum = parseFloat(tamanoLetra);
+      const cantidadLetrasNum = parseInt(cantidadLetras);
+
+      // Calcular cuántas letras caben en una lámina
+      const letrasPorLamina = Math.floor(TAMANO_LAMINA / tamanoLetraNum);
+
+      // Calcular cuántas láminas se necesitan
+      const cantidadLaminas = Math.ceil(cantidadLetrasNum / letrasPorLamina);
+
+      // Guardar info en detalles
+      detalles.letrasPorLamina = letrasPorLamina;
+      detalles.cantidadLaminas = cantidadLaminas;
+
+      // Calcular subtotal: precio base + (precio por pie² * área de la lámina * cantidad de láminas)
+      subtotal = precioBase + (precioPorPie * TAMANO_LAMINA * cantidadLaminas);
+    } else {
+      // Método por área total (original)
+      subtotal = (precioBase * pies) + (precioPorPie * pies);
+    }
 
     // Aplicar condicionales del CSV de forma dinámica
     if (condicionales && condicionales.trim() !== 'N/A') {
@@ -261,11 +328,23 @@ function App() {
 
     const rows = [
       ['Tipo de Servicio', desglose.servicio],
-      ['Espesor', desglose.espesor],
-      ['Pies Cuadrados', desglose.pies2.toString()],
-      ['Precio por Pie²', `B/. ${desglose.precioPorPie2.toFixed(2)}`],
-      ['Subtotal', `B/. ${desglose.subtotal.toFixed(2)}`]
+      ['Espesor', desglose.espesor]
     ];
+
+    // Agregar información según el método de cálculo
+    if (desglose.metodoCalculo === 'letra') {
+      rows.push(['Método', 'Por Tamaño de Letra']);
+      rows.push(['Tamaño de Letra', `${desglose.tamanoLetra} ft²`]);
+      rows.push(['Cantidad de Letras', desglose.cantidadLetras.toString()]);
+      rows.push(['Letras por Lámina', desglose.letrasPorLamina.toString()]);
+      rows.push(['Láminas Necesarias', desglose.cantidadLaminas.toString()]);
+      rows.push(['Total Pies Cuadrados', desglose.pies2.toString()]);
+    } else {
+      rows.push(['Pies Cuadrados', desglose.pies2.toString()]);
+    }
+
+    rows.push(['Precio por Pie²', `B/. ${desglose.precioPorPie2.toFixed(2)}`]);
+    rows.push(['Subtotal', `B/. ${desglose.subtotal.toFixed(2)}`]);
 
     if (desglose.costoLED > 0) {
       rows.push([`Pastillas LED (${desglose.cantidadLED})`, `B/. ${desglose.costoLED.toFixed(2)}`]);
@@ -350,6 +429,26 @@ function App() {
             </div>
           )}
 
+          {(tipoSeleccionado === 'LETRAS FORMADAS' || tipoSeleccionado === 'LETRAS RECORTADAS') && categoriaSeleccionada && (
+            <div className="form-group">
+              <label>Método de Cálculo:</label>
+              <select
+                value={metodoCalculo}
+                onChange={(e) => {
+                  setMetodoCalculo(e.target.value);
+                  // Limpiar campos al cambiar método
+                  setPies2('');
+                  setTamanoLetra('');
+                  setCantidadLetras('');
+                }}
+                className="form-control"
+              >
+                <option value="area">Por Área Total (Pies²)</option>
+                <option value="letra">Por Tamaño de Letra</option>
+              </select>
+            </div>
+          )}
+
           {opcionesEspesor.length > 1 && (
             <div className="form-group">
               <label>Espesor/Opción:</label>
@@ -412,12 +511,52 @@ function App() {
                 );
               })()}
 
-              <div className="conversor-unidades">
-                <h3>Ingrese las medidas para obtener el costo:</h3>
+              {metodoCalculo === 'letra' ? (
+                // Interfaz para método por tamaño de letra
+                <div className="conversor-unidades">
+                  <h3>Cálculo por Tamaño de Letra:</h3>
 
-                <div className="unidades-selector">
-                  <label>Unidad de Medida:</label>
-                  <div className="unidades-botones">
+                  <div className="form-group">
+                    <label>Tamaño de Letra (en pie²):</label>
+                    <input
+                      type="number"
+                      value={tamanoLetra}
+                      onChange={(e) => setTamanoLetra(e.target.value)}
+                      className="form-control"
+                      placeholder="Ej: 0.5"
+                      step="0.01"
+                      min="0"
+                    />
+                    <small style={{color: '#666', fontSize: '0.9em', marginTop: '5px', display: 'block'}}>
+                      Ingrese el tamaño de una letra en pies cuadrados
+                    </small>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Cantidad de Letras:</label>
+                    <input
+                      type="number"
+                      value={cantidadLetras}
+                      onChange={(e) => setCantidadLetras(e.target.value)}
+                      className="form-control"
+                      placeholder="Ej: 10"
+                      step="1"
+                      min="1"
+                    />
+                  </div>
+
+                  <div className="alert-info" style={{marginTop: '15px'}}>
+                    <p><strong>Nota:</strong> Cada lámina de material tiene 32 pie². El sistema calculará automáticamente cuántas letras caben por lámina y cuántas láminas necesitas.</p>
+                  </div>
+                </div>
+              ) : (
+                // Interfaz para método por área (original)
+                <div className="conversor-unidades">
+                  <h3>Ingrese las medidas para obtener el costo:</h3>
+
+                  <div className="unidades-selector">
+                    <label>Unidad de Medida:</label>
+                    <div className="unidades-botones">
                     <button
                       type="button"
                       className={`btn-unidad ${unidadMedida === 'cm' ? 'active' : ''}`}
@@ -490,20 +629,21 @@ function App() {
                 >
                   Calcular Área en Pies²
                 </button>
-              </div>
 
-              <div className="form-group">
-                <label>Pies Cuadrados (ft²):</label>
-                <input
-                  type="number"
-                  value={pies2}
-                  onChange={(e) => setPies2(e.target.value)}
-                  className="form-control"
-                  placeholder="Se calculará automáticamente o ingrese directamente"
-                  step="0.01"
-                  min="0"
-                />
+                <div className="form-group">
+                  <label>Pies Cuadrados (ft²):</label>
+                  <input
+                    type="number"
+                    value={pies2}
+                    onChange={(e) => setPies2(e.target.value)}
+                    className="form-control"
+                    placeholder="Se calculará automáticamente o ingrese directamente"
+                    step="0.01"
+                    min="0"
+                  />
+                </div>
               </div>
+              )}
 
               {servicioSeleccionado['CON LUZ'] === 'SI' && (() => {
                 const cond = servicioSeleccionado['CONDICIONALES '] || servicioSeleccionado['CONDICIONALES'] || '';
@@ -600,10 +740,41 @@ function App() {
                 <span className="label">Espesor:</span>
                 <span className="value">{desglose.espesor}</span>
               </div>
-              <div className="desglose-row">
-                <span className="label">Pies Cuadrados:</span>
-                <span className="value">{desglose.pies2} ft²</span>
-              </div>
+
+              {desglose.metodoCalculo === 'letra' ? (
+                <>
+                  <div className="desglose-row">
+                    <span className="label">Método:</span>
+                    <span className="value">Por Tamaño de Letra</span>
+                  </div>
+                  <div className="desglose-row">
+                    <span className="label">Tamaño de Letra:</span>
+                    <span className="value">{desglose.tamanoLetra} ft²</span>
+                  </div>
+                  <div className="desglose-row">
+                    <span className="label">Cantidad de Letras:</span>
+                    <span className="value">{desglose.cantidadLetras}</span>
+                  </div>
+                  <div className="desglose-row">
+                    <span className="label">Letras por Lámina:</span>
+                    <span className="value">{desglose.letrasPorLamina}</span>
+                  </div>
+                  <div className="desglose-row">
+                    <span className="label">Láminas Necesarias:</span>
+                    <span className="value">{desglose.cantidadLaminas}</span>
+                  </div>
+                  <div className="desglose-row">
+                    <span className="label">Total Pies Cuadrados:</span>
+                    <span className="value">{desglose.pies2} ft²</span>
+                  </div>
+                </>
+              ) : (
+                <div className="desglose-row">
+                  <span className="label">Pies Cuadrados:</span>
+                  <span className="value">{desglose.pies2} ft²</span>
+                </div>
+              )}
+
               <div className="desglose-row">
                 <span className="label">Precio Base:</span>
                 <span className="value">B/. {desglose.precioBase.toFixed(2)}</span>
